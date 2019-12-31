@@ -4,13 +4,17 @@ package com.jjx.esclient.annotation;
 import com.jjx.esclient.enums.Analyzer;
 import com.jjx.esclient.enums.DataType;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * program: esdemo
- * description: 对应索引结构mapping的注解，在es entity field上添加
+ * 对应索引结构mapping的注解，在es entity field上添加
+ *
  * @author admin
- * create: 2019-01-25 16:57
+ * @date 2019-01-25 16:57
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
@@ -20,26 +24,32 @@ public @interface ESMapping {
      * 数据类型（包含 关键字类型）
      */
     DataType datatype() default DataType.text_type;
+
     /**
      * 间接关键字
      */
     boolean keyword() default true;
+
     /**
      * 关键字忽略字数
      */
     int ignore_above() default 256;
+
     /**
      * 是否支持ngram，高效全文搜索提示
      */
     boolean ngram() default false;
+
     /**
      * 是否支持suggest，高效前缀搜索提示
      */
     boolean suggest() default false;
+
     /**
      * 索引分词器设置（研究类型）
      */
     Analyzer analyzer() default Analyzer.standard;
+
     /**
      * 搜索内容分词器设置
      */
@@ -66,7 +76,6 @@ public @interface ESMapping {
      * 对于值是null的进行处理，当值为null是按照注解指定的‘null_value’值进行查询可以查到
      * 需要注意的是要与根本没有某字段区分（没有某字段需要用Exists Query进行查询）
      * 建议设置值为NULL_VALUE
-     * @return
      */
     String null_value() default "";
 }

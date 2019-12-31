@@ -1,20 +1,20 @@
 package com.jjx.esclient.auto.autoindex;
 
 import com.jjx.esclient.annotation.EnableESTools;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.core.type.AnnotationMetadata;
+import com.jjx.esclient.auto.util.GetBasePackage;
 import org.springframework.beans.BeansException;
+import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.config.ConfigurableListableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.ApplicationContext;
-import com.jjx.esclient.auto.util.GetBasePackage;
+import org.springframework.core.type.AnnotationMetadata;
 
 /**
- * program: esdemo
- * description: spring初始化完成后通过读取启动类EnableESTools注解上entity的路径（或者不配置，取启动类所在包），得到路径后委托ESEntityScanner扫描相关路径
+ * spring初始化完成后通过读取启动类EnableESTools注解上entity的路径（或者不配置，取启动类所在包），得到路径后委托ESEntityScanner扫描相关路径
  * ESCRegistrar进行调用
+ *
  * @author admin
- * create: 2019-01-30 17:22
+ * @date 2019-01-30 17:22
  **/
 //@Configuration
 public class ESIndexProcessor {//implements BeanFactoryPostProcessor, ApplicationContextAware, BeanFactoryAware {
@@ -26,10 +26,11 @@ public class ESIndexProcessor {//implements BeanFactoryPostProcessor, Applicatio
 
     /**
      * 扫描ESMetaData注解的类entitypath或根路径的entity托管给spring
+     *
      * @param beanFactory
      * @throws BeansException
      */
-    public void scan(AnnotationMetadata annotationMetadata,BeanFactory beanFactory,ApplicationContext applicationContext){
+    public void scan(AnnotationMetadata annotationMetadata, BeanFactory beanFactory, ApplicationContext applicationContext) {
         GetBasePackage getBasePackage = new GetBasePackage(EnableESTools.class);
         ESEntityScanner scanner = new ESEntityScanner((BeanDefinitionRegistry) beanFactory);
         scanner.setResourceLoader(applicationContext);
@@ -39,6 +40,7 @@ public class ESIndexProcessor {//implements BeanFactoryPostProcessor, Applicatio
 
     /**
      * 扫描ESMetaData注解的类托管给spring
+     *
      * @param beanFactory
      * @throws BeansException
      */

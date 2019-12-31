@@ -1,12 +1,16 @@
 package com.jjx.esclient.annotation;
 
-import java.lang.annotation.*;
+import java.lang.annotation.Documented;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 /**
- * program: esdemo
- * description: ES entity 标识ID的注解,在es entity field上添加
+ * ES entity 标识ID的注解,在es entity field上添加
+ *
  * @author admin
- * create: 2019-01-18 16:092
+ * @date 2019-01-18 16:092
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
