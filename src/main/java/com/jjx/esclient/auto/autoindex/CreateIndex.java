@@ -45,7 +45,7 @@ public class CreateIndex implements ApplicationListener, ApplicationContextAware
                     try {
                         if (!elasticsearchIndex.exists(bean.getClass())) {
                             elasticsearchIndex.createIndex(bean.getClass());
-                            if (EnableESTools.isPrintregmsg()) {
+                            if (EnableESTools.isPrintRegMsg()) {
                                 MetaData metaData = IndexTools.getMetaData(bean.getClass());
                                 logger.info("创建索引成功，索引名称：" + metaData.getIndexname() + "索引类型：" + metaData.getIndextype());
                             }

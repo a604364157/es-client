@@ -23,10 +23,8 @@ import java.io.IOException;
 import java.util.stream.Stream;
 
 /**
- * program: esclientrhl
- * description:
  * @author admin
- * create: 2019-09-04 13:43
+ * @date 2019-09-04 13:43
  **/
 public abstract class AbstractESCRegister {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
@@ -41,7 +39,7 @@ public abstract class AbstractESCRegister {
             BeanDefinition bd = beanDefinitionBuilder.getRawBeanDefinition();
             //生成beanname
             String beanName = beanClassName.substring(beanClassName.lastIndexOf(".") + 1);
-            if(EnableESTools.isPrintregmsg()){
+            if (EnableESTools.isPrintRegMsg()) {
                 logger.info("generate ESCRegistrar beanClassName:" + beanClassName);
                 logger.info("generate ESCRegistrar beanName:" + beanName);
             }
@@ -54,8 +52,11 @@ public abstract class AbstractESCRegister {
     /**
      * 扫描ESCRepository接口的类型并作为候选人返回
      *
-     * @param registry
-     * @return
+     * @param annotationMetadata metadata
+     * @param registry           registry
+     * @param environment        environment
+     * @param resourceLoader     resourceLoader
+     * @return stream
      */
     public Stream<BeanDefinition> getCandidates(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry registry, Environment environment, ResourceLoader resourceLoader) {
         ESCRepositoryComponentProvider scanner = new ESCRepositoryComponentProvider(registry);
@@ -67,8 +68,9 @@ public abstract class AbstractESCRegister {
 
     /**
      * 必须子类实现，autoconfig方式不同
-     * @param annotationMetadata
-     * @return
+     *
+     * @param annotationMetadata metadata
+     * @return stream
      */
     public abstract Stream<String> getBasePackage(AnnotationMetadata annotationMetadata);
 
@@ -76,8 +78,6 @@ public abstract class AbstractESCRegister {
      * scanner interface ESCRepository
      */
     private static class ESCRepositoryComponentProvider extends ClassPathScanningCandidateComponentProvider {
-        private BeanDefinitionRegistry registry;
-
         public ESCRepositoryComponentProvider(BeanDefinitionRegistry registry) {
             super(false);
             Assert.notNull(registry, "BeanDefinitionRegistry must not be null!");

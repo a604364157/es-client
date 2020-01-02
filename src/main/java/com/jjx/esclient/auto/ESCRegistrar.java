@@ -2,6 +2,8 @@ package com.jjx.esclient.auto;
 
 import com.jjx.esclient.annotation.EnableESTools;
 import com.jjx.esclient.auto.autoindex.ESIndexProcessor;
+import com.jjx.esclient.auto.util.AbstractESCRegister;
+import com.jjx.esclient.auto.util.GetBasePackage;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
@@ -15,24 +17,20 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
-import com.jjx.esclient.auto.util.AbstractESCRegister;
-import com.jjx.esclient.auto.util.GetBasePackage;
-import org.springframework.lang.NonNull;
 
 import java.util.stream.Stream;
 
 /**
- * program: esclientrhl
- * description:
  * 作用1：将范围内的接口准备作为springbean进行处理（有beanFactory辅助）
  * 作用2：将实体类扫描并托管给spring管理
+ *
  * @author admin
- * create: 2019-04-16 15:24
+ * @date 2019-04-16 15:24
  **/
 @Configuration
-public class ESCRegistrar extends AbstractESCRegister implements BeanFactoryAware,ApplicationContextAware, ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
-    private @SuppressWarnings("null") ResourceLoader resourceLoader;
-    private @SuppressWarnings("null") Environment environment;
+public class ESCRegistrar extends AbstractESCRegister implements BeanFactoryAware, ApplicationContextAware, ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
+    private ResourceLoader resourceLoader;
+    private Environment environment;
     private ApplicationContext applicationContext;
     private BeanFactory beanFactory;
 
@@ -49,13 +47,14 @@ public class ESCRegistrar extends AbstractESCRegister implements BeanFactoryAwar
 
     /**
      * 模版方法模式
-     * @param annotationMetadata
-     * @param registry
+     *
+     * @param annotationMetadata metadata
+     * @param registry           registry
      */
     @Override
     public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry registry) {
         //扫描entity
-        new ESIndexProcessor().scan(annotationMetadata,beanFactory,applicationContext);
+        new ESIndexProcessor().scan(annotationMetadata, beanFactory, applicationContext);
         //扫描接口
         super.registerBeanDefinitions(beanFactory, environment, resourceLoader, annotationMetadata, registry);
     }

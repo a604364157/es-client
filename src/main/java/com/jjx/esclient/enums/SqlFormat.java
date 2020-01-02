@@ -4,14 +4,34 @@ package com.jjx.esclient.enums;
  * @author admin
  **/
 public enum SqlFormat {
-    CSV("csv","text/csv"),
-    JSON("json","application/json"),
-    TSV("tsv","text/tab-separated-values"),
-    TXT("txt","text/plain"),
-    YAML("yaml","application/yaml"),
-    CBOR("cbor","application/cbor"),
-    SMILE("smile","application/smile");
-
+    /**
+     *
+     */
+    CSV("csv", "text/csv"),
+    /**
+     *
+     */
+    JSON("json", "application/json"),
+    /**
+     *
+     */
+    TSV("tsv", "text/tab-separated-values"),
+    /**
+     *
+     */
+    TXT("txt", "text/plain"),
+    /**
+     *
+     */
+    YAML("yaml", "application/yaml"),
+    /**
+     *
+     */
+    CBOR("cbor", "application/cbor"),
+    /**
+     *
+     */
+    SMILE("smile", "application/smile");
 
     private String format;
     private String acceptHttpHeader;

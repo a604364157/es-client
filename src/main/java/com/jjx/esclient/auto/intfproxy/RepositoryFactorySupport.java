@@ -1,14 +1,23 @@
 package com.jjx.esclient.auto.intfproxy;
 
 import com.jjx.esclient.annotation.EnableESTools;
+import com.jjx.esclient.auto.util.GetBasePackage;
+import org.aopalliance.intercept.Joinpoint;
 import org.aopalliance.intercept.MethodInterceptor;
-import org.aopalliance.intercept.MethodInvocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.framework.ProxyFactory;
 import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.*;
-import org.springframework.context.*;
+import org.springframework.beans.factory.BeanClassLoaderAware;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.FactoryBean;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.ApplicationEventPublisher;
+import org.springframework.context.ApplicationEventPublisherAware;
+import org.springframework.context.ResourceLoaderAware;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.io.support.ResourcePatternResolver;
@@ -16,7 +25,6 @@ import org.springframework.core.io.support.ResourcePatternUtils;
 import org.springframework.core.type.classreading.CachingMetadataReaderFactory;
 import org.springframework.core.type.classreading.MetadataReader;
 import org.springframework.core.type.classreading.MetadataReaderFactory;
-import com.jjx.esclient.auto.util.GetBasePackage;
 
 import java.io.IOException;
 import java.lang.reflect.ParameterizedType;
@@ -27,10 +35,10 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * program: esclientrhl
- * description: 用于生成ESCRepository的代理bean
+ * 用于生成ESCRepository的代理bean
+ *
  * @author admin
- * create: 2019-09-02 23:09
+ * @date 2019-09-02 23:09
  **/
 public class RepositoryFactorySupport<T extends ESCRepository<S, ID>, S, ID> implements ApplicationContextAware, ResourceLoaderAware, InitializingBean, FactoryBean<T>, BeanClassLoaderAware,
         BeanFactoryAware, ApplicationEventPublisherAware {
@@ -39,8 +47,6 @@ public class RepositoryFactorySupport<T extends ESCRepository<S, ID>, S, ID> imp
     private ResourceLoader resourceLoader;
     private T repository;
     private ClassLoader classLoader;
-    private BeanFactory beanFactory;
-    private ApplicationEventPublisher publisher;
     private ApplicationContext applicationContext;
 
     public RepositoryFactorySupport(Class<? extends T> repositoryInterface) {
@@ -56,29 +62,23 @@ public class RepositoryFactorySupport<T extends ESCRepository<S, ID>, S, ID> imp
         }
     }
 
-
-    public <T> T getRepository(Class<T> repositoryInterface) throws Exception {
+    @SuppressWarnings("unchecked")
+    public <R> R getRepository(Class<R> repositoryInterface) throws Exception {
         SimpleESCRepository target = new SimpleESCRepository(applicationContext);
         getMetadata(target);
         ProxyFactory result = new ProxyFactory();
         result.setTarget(target);
-        result.addAdvice(new MethodInterceptor() {
-            @Override
-            public Object invoke(MethodInvocation invocation) throws Throwable {
-                Object result = invocation.proceed();
-                return result;
-            }
-        });
+        result.addAdvice((MethodInterceptor) Joinpoint::proceed);
         result.setInterfaces(this.repositoryInterface, ESCRepository.class);
-        T repository = (T) result.getProxy(classLoader);
-        return repository;
+        return (R) result.getProxy(classLoader);
     }
 
     /**
      * 根据interface获取实体类类型以及主键类型
      *
-     * @param target
+     * @param target target
      */
+    @SuppressWarnings("unchecked")
     private void getMetadata(SimpleESCRepository target) throws Exception {
         Type[] types = repositoryInterface.getGenericInterfaces();
         ParameterizedType parameterized = (ParameterizedType) types[0];
@@ -86,15 +86,15 @@ public class RepositoryFactorySupport<T extends ESCRepository<S, ID>, S, ID> imp
         String domainClassName = parameterized.getActualTypeArguments()[0].getTypeName();
         //实体类主键类型名称
         String idClassName = parameterized.getActualTypeArguments()[1].getTypeName();
-        if (com.jjx.esclient.auto.util.EnableESTools.isPrintregmsg()) {
+        if (com.jjx.esclient.auto.util.EnableESTools.isPrintRegMsg()) {
             logger.info("domainClassName：" + domainClassName + " idClassName：" + idClassName);
         }
         //按照实体类类型名称匹配实体类类型
         List<String> entityList = getEntityList();
-        for (int i = 0; i < entityList.size(); i++) {
-            if (entityList.get(i).lastIndexOf("." + domainClassName) != -1) {
+        for (String s : entityList) {
+            if (s.lastIndexOf("." + domainClassName) != -1) {
                 if (target.getDomainClass() == null) {
-                    target.setDomainClass(Class.forName(entityList.get(i)));
+                    target.setDomainClass(Class.forName(s));
                     break;
                 } else {
                     target.setDomainClass(null);
@@ -122,18 +122,17 @@ public class RepositoryFactorySupport<T extends ESCRepository<S, ID>, S, ID> imp
         return idTypeMap;
     }
 
-
     /**
      * 获取实体类路径上的所有全限定类命
      *
-     * @return
+     * @return list
      */
     private List<String> getEntityList() {
         List<String> entityList = new ArrayList<>();
         GetBasePackage.getEntityPathsMap().get(EnableESTools.class).forEach(s -> {
             ResourcePatternResolver resolver = ResourcePatternUtils.getResourcePatternResolver(resourceLoader);
             MetadataReaderFactory metaReader = new CachingMetadataReaderFactory(resourceLoader);
-            Resource[] resources = new Resource[0];
+            Resource[] resources;
             try {
                 resources = resolver.getResources("classpath*:" + s.replaceAll("\\.", "/") + "/**/*.class");
                 for (Resource r : resources) {
@@ -154,7 +153,6 @@ public class RepositoryFactorySupport<T extends ESCRepository<S, ID>, S, ID> imp
 
     @Override
     public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-        this.beanFactory = beanFactory;
     }
 
     @Override
@@ -165,18 +163,17 @@ public class RepositoryFactorySupport<T extends ESCRepository<S, ID>, S, ID> imp
     /**
      * 实现了FactoryBean可以将生成的代理bean托管给spring
      *
-     * @return
-     * @throws Exception
+     * @return t
      */
     @Override
-    public T getObject() throws Exception {
+    public T getObject() {
         return this.repository;
     }
 
     /**
      * 实现了FactoryBean可以将生成的代理bean托管给spring
      *
-     * @return
+     * @return class
      */
     @Override
     public Class<?> getObjectType() {
@@ -185,7 +182,6 @@ public class RepositoryFactorySupport<T extends ESCRepository<S, ID>, S, ID> imp
 
     @Override
     public void setApplicationEventPublisher(ApplicationEventPublisher publisher) {
-        this.publisher = publisher;
     }
 
     @Override

@@ -3,22 +3,20 @@ package com.jjx.esclient.auto.util;
 import org.springframework.core.annotation.AnnotationAttributes;
 
 /**
- * program: esclientrhl
- * description:
  * @author admin
- * create: 2019-09-05 10:37
+ * @date 2019-09-05 10:37
  **/
 public class EnableESTools {
     private static String[] basePackages;
     private static String[] value;
     private static String[] entityPath;
-    private static boolean printregmsg = false;
+    private static boolean printRegMsg = false;
 
-    public static void gainAnnoInfo(AnnotationAttributes attributes ){
+    public static void gainAnnoInfo(AnnotationAttributes attributes) {
         basePackages = attributes.getStringArray("basePackages");
         value = attributes.getStringArray("value");
         entityPath = attributes.getStringArray("entityPath");
-        printregmsg = attributes.getBoolean("printregmsg");
+        printRegMsg = attributes.getBoolean("printRegMsg");
     }
 
     public static String[] getBasePackages() {
@@ -33,7 +31,7 @@ public class EnableESTools {
         return entityPath;
     }
 
-    public static boolean isPrintregmsg() {
-        return printregmsg;
+    public static boolean isPrintRegMsg() {
+        return printRegMsg;
     }
 }
