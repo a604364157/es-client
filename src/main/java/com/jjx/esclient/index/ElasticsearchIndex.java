@@ -27,6 +27,7 @@ public interface ElasticsearchIndex<T> {
      * 索引是否存在
      *
      * @param clazz clazz
+     * @return b
      * @throws Exception ex
      */
     boolean exists(Class<T> clazz) throws Exception;

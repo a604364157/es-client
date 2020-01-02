@@ -6,32 +6,38 @@ import org.springframework.util.StringUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 /**
- * program: esdemo
- * description: 工具类
+ * 工具类
+ *
  * @author admin
- * create: 2019-01-18 16:23
+ * @date 2019-01-18 16:23
  **/
+@SuppressWarnings("unused")
 public class Tools {
     /**
      * 根据对象中的注解获取ID的字段值
-     * @param obj
-     * @return
+     *
+     * @param obj obj
+     * @return str
      */
-    public static String getESId(Object obj) throws Exception {
+    public static String getEsId(Object obj) throws Exception {
         Field[] fields = obj.getClass().getDeclaredFields();
-        for(Field f : fields){
+        for (Field f : fields) {
             f.setAccessible(true);
             ESID esid = f.getAnnotation(ESID.class);
-            if(esid != null){
+            if (esid != null) {
                 Object value = f.get(obj);
-                if(value == null){
+                if (value == null) {
                     return null;
-                }else{
+                } else {
                     return value.toString();
                 }
             }
@@ -41,16 +47,16 @@ public class Tools {
 
     /**
      * 获取o中所有的字段有值的map组合
-     * @return
+     *
+     * @return map
      */
-    public static Map getFieldValue(Object o) throws IllegalAccessException {
-        Map retMap = new HashMap();
+    public static Map<String, Object> getFieldValue(Object o) throws IllegalAccessException {
+        Map<String, Object> retMap = new HashMap<>(16);
         Field[] fs = o.getClass().getDeclaredFields();
-        for(int i = 0;i < fs.length;i++){
-            Field f = fs[i];
+        for (Field f : fs) {
             f.setAccessible(true);
-            if(f.get(o) != null){
-                retMap.put(f.getName(),f.get(o) );
+            if (f.get(o) != null) {
+                retMap.put(f.getName(), f.get(o));
             }
         }
         return retMap;
@@ -62,72 +68,67 @@ public class Tools {
      * @param clazz The class to introspect
      * @return the first generic declaration, or <code>Object.class</code> if cannot be determined
      */
-    public static Class getSuperClassGenricType(Class clazz) {
-        return getSuperClassGenricType(clazz, 0);
+    public static <T, S> Class<T> getSuperClassGenericType(Class<S> clazz) {
+        return getSuperClassGenericType(clazz, 0);
     }
 
     /**
-     * 通过反射,获得定义Class时声明的父类的范型参数的类型. 如public BookManager extends GenricManager<Book>
+     * 通过反射,获得定义Class时声明的父类的范型参数的类型
      *
      * @param clazz clazz The class to introspect
-     * @param index the Index of the generic ddeclaration,start from 0.
+     * @param index the Index of the generic ,start from 0.
      */
-    public static Class getSuperClassGenricType(Class clazz, int index)
-            throws IndexOutOfBoundsException {
+    @SuppressWarnings("unchecked")
+    public static <T, S> Class<T> getSuperClassGenericType(Class<S> clazz, int index) throws IndexOutOfBoundsException {
         Type genType = clazz.getGenericSuperclass();
         if (!(genType instanceof ParameterizedType)) {
-            return Object.class;
+            return (Class<T>) Object.class;
         }
         Type[] params = ((ParameterizedType) genType).getActualTypeArguments();
         if (index >= params.length || index < 0) {
-            return Object.class;
+            return (Class<T>) Object.class;
         }
         if (!(params[index] instanceof Class)) {
-            return Object.class;
+            return (Class<T>) Object.class;
         }
-        return (Class) params[index];
+        return (Class<T>) params[index];
     }
 
-    public static String arraytostring(String[] strs){
-        if(StringUtils.isEmpty(strs)){
+    public static String arrayToString(String[] strs) {
+        if (StringUtils.isEmpty(strs)) {
             return "";
         }
         StringBuffer sb = new StringBuffer();
-        Arrays.asList(strs).stream().forEach(str -> sb.append(str).append(" "));
+        Arrays.stream(strs).forEach(str -> sb.append(str).append(" "));
         return sb.toString();
     }
 
-    public static boolean arrayISNULL(Object[] objs){
-        if(objs == null || objs.length == 0){
+    public static boolean arrayIsNull(Object[] objs) {
+        if (objs == null || objs.length == 0) {
             return true;
         }
         boolean flag = false;
-        for (int i = 0; i < objs.length; i++) {
-            if(!StringUtils.isEmpty(objs[i])){
+        for (Object obj : objs) {
+            if (!StringUtils.isEmpty(obj)) {
                 flag = true;
+                break;
             }
         }
-        if(flag){
-            return false;
-        }else{
-            return true;
-        }
+        return !flag;
     }
 
-    public static <T> List<List<T>> splitList(List<T> oriList,boolean isParallel){
-        if(oriList.size() <=  Constant.BULK_COUNT){
+    public static <T> List<List<T>> splitList(List<T> oriList, boolean isParallel) {
+        if (oriList.size() <= Constant.BULK_COUNT) {
             List<List<T>> splitList = new ArrayList<>();
             splitList.add(oriList);
             return splitList;
         }
         int limit = (oriList.size() + Constant.BULK_COUNT - 1) / Constant.BULK_COUNT;
-        if(isParallel){
+        if (isParallel) {
             return Stream.iterate(0, n -> n + 1).limit(limit).parallel().map(a -> oriList.stream().skip(a * Constant.BULK_COUNT).limit(Constant.BULK_COUNT).parallel().collect(Collectors.toList())).collect(Collectors.toList());
-        }else{
+        } else {
             final List<List<T>> splitList = new ArrayList<>();
-            Stream.iterate(0, n -> n + 1).limit(limit).forEach(i -> {
-                splitList.add(oriList.stream().skip(i * Constant.BULK_COUNT ).limit(Constant.BULK_COUNT ).collect(Collectors.toList()));
-            });
+            Stream.iterate(0, n -> n + 1).limit(limit).forEach(i -> splitList.add(oriList.stream().skip(i * Constant.BULK_COUNT).limit(Constant.BULK_COUNT).collect(Collectors.toList())));
             return splitList;
         }
     }

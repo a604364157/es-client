@@ -26,7 +26,7 @@ import java.util.stream.Stream;
  * @author admin
  * @date 2019-09-04 13:43
  **/
-public abstract class AbstractESCRegister {
+public abstract class AbstractEsRegister {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     public void registerBeanDefinitions(BeanFactory factory, Environment environment, ResourceLoader resourceLoader, AnnotationMetadata annotationMetadata, BeanDefinitionRegistry registry) {
@@ -37,7 +37,8 @@ public abstract class AbstractESCRegister {
             beanDefinitionBuilder.addConstructorArgValue(beanClassName);
             //获取bean的定义
             BeanDefinition bd = beanDefinitionBuilder.getRawBeanDefinition();
-            //生成beanname
+            //生成beanName
+            Assert.notNull(beanClassName, "beanClassName must not be null!");
             String beanName = beanClassName.substring(beanClassName.lastIndexOf(".") + 1);
             if (EnableESTools.isPrintRegMsg()) {
                 logger.info("generate ESCRegistrar beanClassName:" + beanClassName);
@@ -59,7 +60,7 @@ public abstract class AbstractESCRegister {
      * @return stream
      */
     public Stream<BeanDefinition> getCandidates(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry registry, Environment environment, ResourceLoader resourceLoader) {
-        ESCRepositoryComponentProvider scanner = new ESCRepositoryComponentProvider(registry);
+        EsRepositoryComponentProvider scanner = new EsRepositoryComponentProvider(registry);
         scanner.setEnvironment(environment);
         scanner.setResourceLoader(resourceLoader);
         //输入是basepackages，输出是BeanDefinition的Stream
@@ -77,8 +78,8 @@ public abstract class AbstractESCRegister {
     /**
      * scanner interface ESCRepository
      */
-    private static class ESCRepositoryComponentProvider extends ClassPathScanningCandidateComponentProvider {
-        public ESCRepositoryComponentProvider(BeanDefinitionRegistry registry) {
+    private static class EsRepositoryComponentProvider extends ClassPathScanningCandidateComponentProvider {
+        public EsRepositoryComponentProvider(BeanDefinitionRegistry registry) {
             super(false);
             Assert.notNull(registry, "BeanDefinitionRegistry must not be null!");
             super.addIncludeFilter(new InterfaceTypeFilter(ESCRepository.class));
@@ -88,8 +89,7 @@ public abstract class AbstractESCRegister {
         protected boolean isCandidateComponent(AnnotatedBeanDefinition beanDefinition) {
             boolean isNonRepositoryInterface = !isGenericRepositoryInterface(beanDefinition.getBeanClassName());
             boolean isTopLevelType = !beanDefinition.getMetadata().hasEnclosingClass();
-            boolean isConsiderNestedRepositories = false;
-            return isNonRepositoryInterface && (isTopLevelType || isConsiderNestedRepositories);
+            return isNonRepositoryInterface && isTopLevelType;
         }
 
         private static boolean isGenericRepositoryInterface(@Nullable String interfaceName) {

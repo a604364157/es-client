@@ -31,18 +31,18 @@ public class ElasticsearchIndexImpl<T> implements ElasticsearchIndex<T> {
     @Override
     public void createIndex(Class<T> clazz) {
         MetaData metaData = IndexTools.getMetaData(clazz);
-        CreateIndexRequest request = new CreateIndexRequest(metaData.getIndexname());
+        CreateIndexRequest request = new CreateIndexRequest(metaData.getIndexName());
         StringBuilder source = new StringBuilder();
-        source.append("  {\n" + "    \"").append(metaData.getIndextype()).append("\": {\n").append("      \"properties\": {\n");
+        source.append("  {\n" + "    \"").append(metaData.getIndexType()).append("\": {\n").append("      \"properties\": {\n");
         MappingData[] mappingDataList = IndexTools.getMappingData(clazz);
         boolean isNgram = false;
         for (int i = 0; i < mappingDataList.length; i++) {
             MappingData mappingData = mappingDataList[i];
-            if (mappingData == null || mappingData.getField_name() == null) {
+            if (mappingData == null || mappingData.getFieldName() == null) {
                 continue;
             }
-            source.append(" \"").append(mappingData.getField_name()).append("\": {\n");
-            source.append(" \"type\": \"").append(mappingData.getDatatype()).append("\"\n");
+            source.append(" \"").append(mappingData.getFieldName()).append("\": {\n");
+            source.append(" \"type\": \"").append(mappingData.getDataType()).append("\"\n");
             if (!StringUtils.isEmpty(mappingData.getCopy_to())) {
                 source.append(" ,\"copy_to\": \"").append(mappingData.getCopy_to()).append("\"\n");
             }
@@ -52,32 +52,32 @@ public class ElasticsearchIndexImpl<T> implements ElasticsearchIndex<T> {
             if (!mappingData.isAllow_search()) {
                 source.append(" ,\"index\": false\n");
             }
-            if (mappingData.isNgram() && ("text".equals(mappingData.getDatatype()) || "keyword".equals(mappingData.getDatatype()))) {
+            if (mappingData.isNgram() && ("text".equals(mappingData.getDataType()) || "keyword".equals(mappingData.getDataType()))) {
                 source.append(" ,\"analyzer\": \"autocomplete\"\n");
                 source.append(" ,\"search_analyzer\": \"standard\"\n");
                 isNgram = true;
-            } else if ("text".equals(mappingData.getDatatype())) {
+            } else if ("text".equals(mappingData.getDataType())) {
                 source.append(" ,\"analyzer\": \"").append(mappingData.getAnalyzer()).append("\"\n");
-                source.append(" ,\"search_analyzer\": \"").append(mappingData.getSearch_analyzer()).append("\"\n");
+                source.append(" ,\"search_analyzer\": \"").append(mappingData.getSearchAnalyzer()).append("\"\n");
             }
-            if (mappingData.isKeyword() && !"keyword".equals(mappingData.getDatatype()) && mappingData.isSuggest()) {
+            if (mappingData.isKeyword() && !"keyword".equals(mappingData.getDataType()) && mappingData.isSuggest()) {
                 source.append(" \n");
                 source.append(" ,\"fields\": {\n");
                 source.append(" \"keyword\": {\n");
                 source.append(" \"type\": \"keyword\",\n");
-                source.append(" \"ignore_above\": ").append(mappingData.getIgnore_above());
+                source.append(" \"ignore_above\": ").append(mappingData.getIgnoreAbove());
                 source.append(" },\n");
                 source.append(" \"suggest\": {\n");
                 source.append(" \"type\": \"completion\",\n");
                 source.append(" \"analyzer\": \"").append(mappingData.getAnalyzer()).append("\"\n");
                 source.append(" }\n");
                 source.append(" }\n");
-            } else if (mappingData.isKeyword() && !"keyword".equals(mappingData.getDatatype()) && !mappingData.isSuggest()) {
+            } else if (mappingData.isKeyword() && !"keyword".equals(mappingData.getDataType()) && !mappingData.isSuggest()) {
                 source.append(" \n");
                 source.append(" ,\"fields\": {\n");
                 source.append(" \"keyword\": {\n");
                 source.append(" \"type\": \"keyword\",\n");
-                source.append(" \"ignore_above\": ").append(mappingData.getIgnore_above());
+                source.append(" \"ignore_above\": ").append(mappingData.getIgnoreAbove());
                 source.append(" }\n");
                 source.append(" }\n");
             } else if (!mappingData.isKeyword() && mappingData.isSuggest()) {
@@ -100,8 +100,8 @@ public class ElasticsearchIndexImpl<T> implements ElasticsearchIndex<T> {
         source.append(" }\n");
         if (isNgram) {
             request.settings(Settings.builder()
-                    .put("index.number_of_shards", metaData.getNumber_of_shards())
-                    .put("index.number_of_replicas", metaData.getNumber_of_replicas())
+                    .put("index.number_of_shards", metaData.getNumberOfShards())
+                    .put("index.number_of_replicas", metaData.getNumberOfReplicas())
                     .put("analysis.filter.autocomplete_filter.type", "edge_ngram")
                     .put("analysis.filter.autocomplete_filter.min_gram", 1)
                     .put("analysis.filter.autocomplete_filter.max_gram", 20)
@@ -111,12 +111,12 @@ public class ElasticsearchIndexImpl<T> implements ElasticsearchIndex<T> {
             );
         } else {
             request.settings(Settings.builder()
-                    .put("index.number_of_shards", metaData.getNumber_of_shards())
-                    .put("index.number_of_replicas", metaData.getNumber_of_replicas())
+                    .put("index.number_of_shards", metaData.getNumberOfShards())
+                    .put("index.number_of_replicas", metaData.getNumberOfReplicas())
             );
         }
         //类型定义
-        request.mapping(metaData.getIndextype(), source.toString(), XContentType.JSON);
+        request.mapping(metaData.getIndexType(), source.toString(), XContentType.JSON);
         try {
             CreateIndexResponse createIndexResponse = client.indices().create(request, RequestOptions.DEFAULT);
             //返回的CreateIndexResponse允许检索有关执行的操作的信息，如下所示：
@@ -131,7 +131,7 @@ public class ElasticsearchIndexImpl<T> implements ElasticsearchIndex<T> {
     @Override
     public void dropIndex(Class<T> clazz) throws Exception {
         MetaData metaData = IndexTools.getIndexType(clazz);
-        String indexname = metaData.getIndexname();
+        String indexname = metaData.getIndexName();
         DeleteIndexRequest request = new DeleteIndexRequest(indexname);
         client.indices().delete(request, RequestOptions.DEFAULT);
     }
@@ -139,7 +139,7 @@ public class ElasticsearchIndexImpl<T> implements ElasticsearchIndex<T> {
     @Override
     public boolean exists(Class<T> clazz) throws Exception {
         MetaData metaData = IndexTools.getIndexType(clazz);
-        String indexname = metaData.getIndexname();
+        String indexname = metaData.getIndexName();
         GetIndexRequest request = new GetIndexRequest(indexname);
         return client.indices().exists(request, RequestOptions.DEFAULT);
     }

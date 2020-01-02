@@ -1,6 +1,6 @@
 package com.jjx.esclient.annotation;
 
-import com.jjx.esclient.auto.ESCRegistrar;
+import com.jjx.esclient.auto.EsRegistrar;
 import com.jjx.esclient.config.ElasticSearchConfiguration;
 import org.springframework.context.annotation.Import;
 
@@ -24,7 +24,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 @Documented
 @Inherited
-@Import({ElasticSearchConfiguration.class, ESCRegistrar.class})
+@Import({ElasticSearchConfiguration.class, EsRegistrar.class})
 public @interface EnableESTools {
 
     /**

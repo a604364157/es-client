@@ -112,23 +112,21 @@ import java.util.concurrent.ConcurrentHashMap;
 
 
 /**
- * program: esdemo
- * description: Elasticsearch基础功能组件实现类
+ * Elasticsearch基础功能组件实现类
  *
  * @author admin
- * create: 2019-01-18 16:04
+ * @date 2019-01-18 16:04
  **/
 @Component
 public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T, M> {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    RestHighLevelClient client;
+    private RestHighLevelClient client;
 
     @Override
     public Response request(Request request) throws Exception {
-        Response response = client.getLowLevelClient().performRequest(request);
-        return response;
+        return client.getLowLevelClient().performRequest(request);
     }
 
     @Override
@@ -139,21 +137,21 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public boolean save(T t, String routing) throws Exception {
         MetaData metaData = IndexTools.getIndexType(t.getClass());
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
-        String id = Tools.getESId(t);
-        IndexRequest indexRequest = null;
-        if (StringUtils.isEmpty(id)) {
-            indexRequest = new IndexRequest(indexname, indextype);
-        } else {
-            indexRequest = new IndexRequest(indexname, indextype, id);
+        String indexName = metaData.getIndexName();
+        String indexType = metaData.getIndexType();
+        String id = Tools.getEsId(t);
+        IndexRequest indexRequest;
+        indexRequest = new IndexRequest(indexName);
+        indexRequest.opType(indexType);
+        if (!StringUtils.isEmpty(id)) {
+            indexRequest.id(id);
         }
         String source = JsonUtils.toJSONString(t);
         indexRequest.source(source, XContentType.JSON);
         if (!StringUtils.isEmpty(routing)) {
             indexRequest.routing(routing);
         }
-        IndexResponse indexResponse = null;
+        IndexResponse indexResponse;
         indexResponse = client.index(indexRequest, RequestOptions.DEFAULT);
         if (indexResponse.getResult() == DocWriteResponse.Result.CREATED) {
             logger.info("INDEX CREATE SUCCESS");
@@ -172,9 +170,9 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
         }
         T t = list.get(0);
         MetaData metaData = IndexTools.getIndexType(t.getClass());
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
-        return savePart(list, indexname, indextype);
+        String indexName = metaData.getIndexName();
+        String indexType = metaData.getIndexType();
+        return savePart(list, indexName, indexType);
     }
 
     @Override
@@ -184,26 +182,23 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
         }
         T t = list.get(0);
         MetaData metaData = IndexTools.getIndexType(t.getClass());
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
+        String indexName = metaData.getIndexName();
+        String indexType = metaData.getIndexType();
         List<List<T>> lists = Tools.splitList(list, true);
         BulkResponse[] bulkResponses = new BulkResponse[lists.size()];
         for (int i = 0; i < lists.size(); i++) {
-            bulkResponses[i] = savePart(lists.get(i), indexname, indextype);
+            bulkResponses[i] = savePart(lists.get(i), indexName, indexType);
         }
         return bulkResponses;
     }
 
     private BulkResponse savePart(List<T> list, String indexname, String indextype) throws Exception {
         BulkRequest rrr = new BulkRequest();
-        for (int i = 0; i < list.size(); i++) {
-            T tt = list.get(i);
-            String id = Tools.getESId(tt);
-            rrr.add(new IndexRequest(indexname, indextype, id)
-                    .source(BeanTools.objectToMap(tt)));
+        for (T tt : list) {
+            String id = Tools.getEsId(tt);
+            rrr.add(new IndexRequest(indexname, indextype, id).source(BeanTools.objectToMap(tt)));
         }
-        BulkResponse bulkResponse = client.bulk(rrr, RequestOptions.DEFAULT);
-        return bulkResponse;
+        return client.bulk(rrr, RequestOptions.DEFAULT);
     }
 
     @Override
@@ -213,9 +208,9 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
         }
         T t = list.get(0);
         MetaData metaData = IndexTools.getIndexType(t.getClass());
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
-        return updatePart(list, indexname, indextype);
+        String indexName = metaData.getIndexName();
+        String indexType = metaData.getIndexType();
+        return updatePart(list, indexName, indexType);
     }
 
     @Override
@@ -225,34 +220,31 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
         }
         T t = list.get(0);
         MetaData metaData = IndexTools.getIndexType(t.getClass());
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
+        String indexName = metaData.getIndexName();
+        String indexType = metaData.getIndexType();
         List<List<T>> lists = Tools.splitList(list, true);
         BulkResponse[] bulkResponses = new BulkResponse[lists.size()];
         for (int i = 0; i < lists.size(); i++) {
-            bulkResponses[i] = updatePart(lists.get(i), indexname, indextype);
+            bulkResponses[i] = updatePart(lists.get(i), indexName, indexType);
         }
         return bulkResponses;
     }
 
     private BulkResponse updatePart(List<T> list, String indexname, String indextype) throws Exception {
         BulkRequest rrr = new BulkRequest();
-        for (int i = 0; i < list.size(); i++) {
-            T tt = list.get(i);
-            String id = Tools.getESId(tt);
-            rrr.add(new UpdateRequest(indexname, indextype, id)
-                    .doc(Tools.getFieldValue(tt)));
+        for (T tt : list) {
+            String id = Tools.getEsId(tt);
+            rrr.add(new UpdateRequest(indexname, indextype, id).doc(Tools.getFieldValue(tt)));
         }
-        BulkResponse bulkResponse = client.bulk(rrr, RequestOptions.DEFAULT);
-        return bulkResponse;
+        return client.bulk(rrr, RequestOptions.DEFAULT);
     }
 
     @Override
     public boolean update(T t) throws Exception {
         MetaData metaData = IndexTools.getIndexType(t.getClass());
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
-        String id = Tools.getESId(t);
+        String indexname = metaData.getIndexName();
+        String indextype = metaData.getIndexType();
+        String id = Tools.getEsId(t);
         if (StringUtils.isEmpty(id)) {
             throw new Exception("ID cannot be empty");
         }
@@ -273,12 +265,12 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public BulkResponse batchUpdate(QueryBuilder queryBuilder, T t, Class clazz, int limitcount, boolean asyn) throws Exception {
         MetaData metaData = IndexTools.getIndexType(t.getClass());
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
+        String indexname = metaData.getIndexName();
+        String indextype = metaData.getIndexType();
         if (queryBuilder == null) {
             throw new NullPointerException();
         }
-        if (Tools.getESId(t) == null || "".equals(Tools.getESId(t))) {
+        if (Tools.getEsId(t) == null || "".equals(Tools.getEsId(t))) {
             PageSortHighLight psh = new PageSortHighLight(1, limitcount);
             psh.setHighLight(null);
             PageList pageList = this.search(queryBuilder, psh, clazz, indexname);
@@ -308,7 +300,7 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
         BulkRequest rrr = new BulkRequest();
         for (int i = 0; i < list.size(); i++) {
             T tt = list.get(i);
-            rrr.add(new UpdateRequest(indexname, indextype, Tools.getESId(tt))
+            rrr.add(new UpdateRequest(indexname, indextype, Tools.getEsId(tt))
                     .doc(map));
         }
         BulkResponse bulkResponse = client.bulk(rrr, RequestOptions.DEFAULT);
@@ -329,9 +321,9 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public boolean delete(T t, String routing) throws Exception {
         MetaData metaData = IndexTools.getIndexType(t.getClass());
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
-        String id = Tools.getESId(t);
+        String indexname = metaData.getIndexName();
+        String indextype = metaData.getIndexType();
+        String id = Tools.getEsId(t);
         if (StringUtils.isEmpty(id)) {
             throw new Exception("ID cannot be empty");
         }
@@ -376,7 +368,7 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public List<T> search(QueryBuilder queryBuilder, Class<T> clazz, String... indexs) throws Exception {
         MetaData metaData = IndexTools.getIndexType(clazz);
-        String indextype = metaData.getIndextype();
+        String indextype = metaData.getIndexType();
         List<T> list = new ArrayList<>();
         SearchRequest searchRequest = new SearchRequest(indexs);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
@@ -419,8 +411,8 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public List<T> searchUri(String uri, Class<T> clazz) throws Exception {
         MetaData metaData = IndexTools.getIndexType(clazz);
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
+        String indexname = metaData.getIndexName();
+        String indextype = metaData.getIndexType();
         List<T> list = new ArrayList<>();
         Request request = new Request("GET", "/" + indexname + "/" + indextype + "/_search/?" + uri);
         Response response = request(request);
@@ -497,8 +489,8 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public T getById(M id, Class<T> clazz) throws Exception {
         MetaData metaData = IndexTools.getIndexType(clazz);
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
+        String indexname = metaData.getIndexName();
+        String indextype = metaData.getIndexType();
         if (StringUtils.isEmpty(id)) {
             throw new Exception("ID cannot be empty");
         }
@@ -513,8 +505,8 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public List<T> mgetById(M[] ids, Class<T> clazz) throws Exception {
         MetaData metaData = IndexTools.getIndexType(clazz);
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
+        String indexname = metaData.getIndexName();
+        String indextype = metaData.getIndexType();
         MultiGetRequest request = new MultiGetRequest();
         for (int i = 0; i < ids.length; i++) {
             request.add(new MultiGetRequest.Item(indexname, indextype, ids[i].toString()));
@@ -534,8 +526,8 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public boolean exists(M id, Class<T> clazz) throws Exception {
         MetaData metaData = IndexTools.getIndexType(clazz);
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
+        String indexname = metaData.getIndexName();
+        String indextype = metaData.getIndexType();
         if (StringUtils.isEmpty(id)) {
             throw new Exception("ID cannot be empty");
         }
@@ -1270,8 +1262,8 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public boolean deleteById(M id, Class<T> clazz) throws Exception {
         MetaData metaData = IndexTools.getIndexType(clazz);
-        String indexname = metaData.getIndexname();
-        String indextype = metaData.getIndextype();
+        String indexname = metaData.getIndexName();
+        String indextype = metaData.getIndexType();
         if (StringUtils.isEmpty(id)) {
             throw new Exception("ID cannot be empty");
         }
@@ -1516,7 +1508,7 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public List<T> searchTemplateBySource(Map<String, Object> template_params, String templateSource, Class<T> clazz) throws Exception {
         MetaData metaData = IndexTools.getIndexType(clazz);
-        String indexname = metaData.getIndexname();
+        String indexname = metaData.getIndexName();
         SearchTemplateRequest request = new SearchTemplateRequest();
         request.setRequest(new SearchRequest(indexname));
         request.setScriptType(ScriptType.INLINE);
@@ -1572,7 +1564,7 @@ public class ElasticsearchTemplateImpl<T, M> implements ElasticsearchTemplate<T,
     @Override
     public ScrollResponse<T> createScroll(QueryBuilder queryBuilder, Class<T> clazz, long time, int size) throws Exception {
         MetaData metaData = IndexTools.getIndexType(clazz);
-        String indexname = metaData.getIndexname();
+        String indexname = metaData.getIndexName();
         return createScroll(queryBuilder, clazz, time, size, indexname);
     }
 

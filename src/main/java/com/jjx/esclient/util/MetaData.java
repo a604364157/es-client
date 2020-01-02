@@ -2,14 +2,17 @@ package com.jjx.esclient.util;
 
 /**
  * 元数据载体类
+ *
+ * @author jiangjx
  */
-public class MetaData{
-    public MetaData(String indexname, String indextype) {
-        this.indexname = indexname;
-        this.indextype = indextype;
+public class MetaData {
+    public MetaData(String indexName, String indexType) {
+        this.indexName = indexName;
+        this.indexType = indexType;
     }
-    String indexname = "";
-    String indextype = "";
+
+    String indexName = "";
+    String indexType = "";
 
     String[] searchIndexNames;
 
@@ -31,47 +34,50 @@ public class MetaData{
         this.printLog = printLog;
     }
 
-    public String getIndexname() {
-        return indexname;
-    }
-    public void setIndexname(String indexname) {
-        this.indexname = indexname;
-    }
-    public String getIndextype() {
-        return indextype;
-    }
-    public void setIndextype(String indextype) {
-        this.indextype = indextype;
+    public String getIndexName() {
+        return indexName;
     }
 
-    int number_of_shards;
-    int number_of_replicas;
-
-    public int getNumber_of_shards() {
-        return number_of_shards;
+    public void setIndexName(String indexName) {
+        this.indexName = indexName;
     }
 
-    public void setNumber_of_shards(int number_of_shards) {
-        this.number_of_shards = number_of_shards;
+    public String getIndexType() {
+        return indexType;
     }
 
-    public int getNumber_of_replicas() {
-        return number_of_replicas;
+    public void setIndexType(String indexType) {
+        this.indexType = indexType;
     }
 
-    public void setNumber_of_replicas(int number_of_replicas) {
-        this.number_of_replicas = number_of_replicas;
+    int numberOfShards;
+    int numberOfReplicas;
+
+    public int getNumberOfShards() {
+        return numberOfShards;
     }
 
-    public MetaData(String indexname, String indextype, int number_of_shards, int number_of_replicas) {
-        this.indexname = indexname;
-        this.indextype = indextype;
-        this.number_of_shards = number_of_shards;
-        this.number_of_replicas = number_of_replicas;
+    public void setNumberOfShards(int numberOfShards) {
+        this.numberOfShards = numberOfShards;
     }
 
-    public MetaData(int number_of_shards, int number_of_replicas) {
-        this.number_of_shards = number_of_shards;
-        this.number_of_replicas = number_of_replicas;
+    public int getNumberOfReplicas() {
+        return numberOfReplicas;
+    }
+
+    public void setNumberOfReplicas(int numberOfReplicas) {
+        this.numberOfReplicas = numberOfReplicas;
+    }
+
+    public MetaData(String indexName, String indexType, int numberOfShards, int numberOfReplicas) {
+        this.indexName = indexName;
+        this.indexType = indexType;
+        this.numberOfShards = numberOfShards;
+        this.numberOfReplicas = numberOfReplicas;
+    }
+
+    public MetaData(int numberOfShards, int numberOfReplicas) {
+        this.numberOfShards = numberOfShards;
+        this.numberOfReplicas = numberOfReplicas;
     }
 }

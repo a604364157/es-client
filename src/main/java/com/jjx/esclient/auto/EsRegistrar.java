@@ -2,7 +2,7 @@ package com.jjx.esclient.auto;
 
 import com.jjx.esclient.annotation.EnableESTools;
 import com.jjx.esclient.auto.autoindex.ESIndexProcessor;
-import com.jjx.esclient.auto.util.AbstractESCRegister;
+import com.jjx.esclient.auto.util.AbstractEsRegister;
 import com.jjx.esclient.auto.util.GetBasePackage;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
@@ -21,14 +21,14 @@ import org.springframework.core.type.AnnotationMetadata;
 import java.util.stream.Stream;
 
 /**
- * 作用1：将范围内的接口准备作为springbean进行处理（有beanFactory辅助）
+ * 作用1：将范围内的接口准备作为springBean进行处理（有beanFactory辅助）
  * 作用2：将实体类扫描并托管给spring管理
  *
  * @author admin
  * @date 2019-04-16 15:24
  **/
 @Configuration
-public class ESCRegistrar extends AbstractESCRegister implements BeanFactoryAware, ApplicationContextAware, ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
+public class EsRegistrar extends AbstractEsRegister implements BeanFactoryAware, ApplicationContextAware, ImportBeanDefinitionRegistrar, ResourceLoaderAware, EnvironmentAware {
     private ResourceLoader resourceLoader;
     private Environment environment;
     private ApplicationContext applicationContext;

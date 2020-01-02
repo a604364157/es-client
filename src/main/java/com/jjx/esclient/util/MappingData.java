@@ -1,77 +1,65 @@
 package com.jjx.esclient.util;
 
 /**
- * program: esdemo
- * description: mapping注解对应的数据载体类
+ * mapping注解对应的数据载体类
+ *
  * @author admin
- * create: 2019-01-29 15:09
+ * @date 2019-01-29 15:09
  **/
+@SuppressWarnings("unused")
 public class MappingData {
 
-    String field_name;
+    private String fieldName;
     /**
      * 数据类型（包含 关键字类型）
-     * @return
      */
-    String datatype;
+    private String dataType;
     /**
      * 间接关键字
-     * @return
      */
-    boolean keyword;
+    private boolean keyword;
 
     /**
      * 关键字忽略字数
-     * @return
      */
-    int ignore_above;
+    private int ignoreAbove;
     /**
      * 是否支持ngram，高效全文搜索提示
-     * @return
      */
-    boolean ngram;
+    private boolean ngram;
     /**
      * 是否支持suggest，高效前缀搜索提示
-     * @return
      */
-    boolean suggest;
+    private boolean suggest;
     /**
      * 索引分词器设置
-     * @return
      */
-    String analyzer;
+    private String analyzer;
     /**
      * 搜索内容分词器设置
-     * @return
      */
-    String search_analyzer;
-//    /**
-//     * 是否分析字段
-//     * @return
-//     */
-//    String analyzedtype;
+    private String searchAnalyzer;
 
-    private boolean allow_search;
+    private boolean allowSearch;
 
-    private String copy_to;
+    private String copyTo;
 
-    private String null_value;
+    private String nullValue;
 
-
-    public String getField_name() {
-        return field_name;
+    public String getFieldName() {
+        return fieldName;
     }
 
-    public void setField_name(String field_name) {
-        this.field_name = field_name;
+    public void setFieldName(String fieldName) {
+        this.fieldName = fieldName;
     }
 
-    public String getDatatype() {
-        return datatype;
+    public String getDataType() {
+        return dataType;
     }
 
-    public void setDatatype(String datatype) {
-        this.datatype = datatype;
+    public void setDataType(String dataType) {
+        this.dataType = dataType;
     }
 
     public boolean isKeyword() {
@@ -82,12 +70,12 @@ public class MappingData {
         this.keyword = keyword;
     }
 
-    public int getIgnore_above() {
-        return ignore_above;
+    public int getIgnoreAbove() {
+        return ignoreAbove;
     }
 
-    public void setIgnore_above(int ignore_above) {
-        this.ignore_above = ignore_above;
+    public void setIgnoreAbove(int ignoreAbove) {
+        this.ignoreAbove = ignoreAbove;
     }
 
     public boolean isNgram() {
@@ -114,44 +102,35 @@ public class MappingData {
         this.analyzer = analyzer;
     }
 
-    public String getSearch_analyzer() {
-        return search_analyzer;
+    public String getSearchAnalyzer() {
+        return searchAnalyzer;
     }
 
-    public void setSearch_analyzer(String search_analyzer) {
-        this.search_analyzer = search_analyzer;
+    public void setSearchAnalyzer(String searchAnalyzer) {
+        this.searchAnalyzer = searchAnalyzer;
     }
 
-//    public String getAnalyzedtype() {
-//        return analyzedtype;
-//    }
-//
-//    public void setAnalyzedtype(String analyzedtype) {
-//        this.analyzedtype = analyzedtype;
-//    }
-
-
-    public String getCopy_to() {
-        return copy_to;
+    public boolean isAllowSearch() {
+        return allowSearch;
     }
 
-    public void setCopy_to(String copy_to) {
-        this.copy_to = copy_to;
+    public void setAllowSearch(boolean allowSearch) {
+        this.allowSearch = allowSearch;
     }
 
-    public boolean isAllow_search() {
-        return allow_search;
+    public String getCopyTo() {
+        return copyTo;
     }
 
-    public void setAllow_search(boolean allow_search) {
-        this.allow_search = allow_search;
+    public void setCopyTo(String copyTo) {
+        this.copyTo = copyTo;
     }
 
-    public String getNull_value() {
-        return null_value;
+    public String getNullValue() {
+        return nullValue;
     }
 
-    public void setNull_value(String null_value) {
-        this.null_value = null_value;
+    public void setNullValue(String nullValue) {
+        this.nullValue = nullValue;
     }
 }

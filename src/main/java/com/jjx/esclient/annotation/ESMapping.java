@@ -54,12 +54,6 @@ public @interface ESMapping {
      * 搜索内容分词器设置
      */
     Analyzer search_analyzer() default Analyzer.standard;
-    //6+版本已经改变方式
-//    /**
-//     * 是否分析字段
-//     * @return
-//     */
-//    AnalyzedType analyzedtype() default AnalyzedType.analyzed;
 
     /**
      * 是否允许被搜索

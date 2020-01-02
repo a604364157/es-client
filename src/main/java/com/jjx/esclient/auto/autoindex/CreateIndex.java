@@ -25,21 +25,21 @@ import java.util.Map;
  * @date 2019-01-30 18:43
  **/
 @Configuration
-public class CreateIndex implements ApplicationListener, ApplicationContextAware {
+public class CreateIndex<T, E extends ApplicationEvent> implements ApplicationListener<E>, ApplicationContextAware {
     private Logger logger = LoggerFactory.getLogger(this.getClass());
 
     @Autowired
-    private ElasticsearchIndex elasticsearchIndex;
+    private ElasticsearchIndex<T> elasticsearchIndex;
 
     private ApplicationContext applicationContext;
 
     /**
      * 扫描ESMetaData注解的类，并自动创建索引mapping
      *
-     * @param event event
+     * @param e event
      */
     @Override
-    public void onApplicationEvent(ApplicationEvent event) {
+    public void onApplicationEvent(E e) {
         Map<String, Object> beansWithAnnotationMap = this.applicationContext.getBeansWithAnnotation(ESMetaData.class);
         beansWithAnnotationMap.forEach((beanName, bean) -> {
                     try {
@@ -47,11 +47,11 @@ public class CreateIndex implements ApplicationListener, ApplicationContextAware
                             elasticsearchIndex.createIndex(bean.getClass());
                             if (EnableESTools.isPrintRegMsg()) {
                                 MetaData metaData = IndexTools.getMetaData(bean.getClass());
-                                logger.info("创建索引成功，索引名称：" + metaData.getIndexname() + "索引类型：" + metaData.getIndextype());
+                                logger.info("创建索引成功，索引名称：" + metaData.getIndexName() + "索引类型：" + metaData.getIndexType());
                             }
                         }
-                    } catch (Exception e) {
-                        logger.error("创建索引不成功", e);
+                    } catch (Exception ex) {
+                        logger.error("创建索引不成功", ex);
                     }
                 }
         );
@@ -61,4 +61,5 @@ public class CreateIndex implements ApplicationListener, ApplicationContextAware
     public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
         this.applicationContext = applicationContext;
     }
+
 }
